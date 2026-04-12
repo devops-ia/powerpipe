@@ -1,0 +1,23 @@
+---
+name: Bump Powerpipe version
+
+sources:
+  powerpipe:
+    kind: githubRelease
+    spec:
+      owner: turbot
+      repository: powerpipe
+      token: '{{ requiredEnv "GITHUB_TOKEN" }}'
+      versionFilter:
+        kind: semver
+        pattern: ">=1.0.0"
+
+targets:
+  dockerfile:
+    name: "Update Powerpipe version in Dockerfile"
+    kind: file
+    sourceid: powerpipe
+    spec:
+      file: Dockerfile
+      matchpattern: 'ARG POWERPIPE_VERSION=.*'
+      replacepattern: 'ARG POWERPIPE_VERSION={{ source "powerpipe" }}'

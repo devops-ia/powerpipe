@@ -1,0 +1,15 @@
+# Example Powerpipe variable file (.ppvars)
+# Place this file in your mod workspace directory to set input variables.
+# Reference: https://powerpipe.io/docs/reference/config-files/variables
+
+# Tags to filter benchmark results (optional)
+# benchmark_tags = {
+#   environment = "production"
+#   team        = "platform"
+# }
+
+# Limit benchmarks to specific AWS regions (optional, defaults to all)
+# regions = ["us-east-1", "eu-west-1"]
+
+# Control the number of parallel control evaluations
+# max_parallel = 5
