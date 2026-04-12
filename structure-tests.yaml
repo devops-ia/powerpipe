@@ -1,0 +1,87 @@
+schemaVersion: "2.0.0"
+
+# Validate binary
+fileExistenceTests:
+  - name: "powerpipe binary exists"
+    path: "/usr/local/bin/powerpipe"
+    shouldExist: true
+    permissions: "-rwxr-xr-x"
+
+  - name: "powerpipe home dir exists"
+    path: "/home/powerpipe"
+    shouldExist: true
+
+  - name: "powerpipe install dir exists"
+    path: "/home/powerpipe/.powerpipe"
+    shouldExist: true
+
+  - name: "workspace dir exists"
+    path: "/workspace"
+    shouldExist: true
+
+# Validate image metadata
+metadataTest:
+  labels:
+    - key: "org.opencontainers.image.title"
+      value: "Powerpipe"
+    - key: "org.opencontainers.image.vendor"
+      value: "devops-ia"
+    - key: "org.opencontainers.image.source"
+      value: "https://github.com/devops-ia/powerpipe"
+  exposedPorts:
+    - "9033"
+  cmd:
+    - "powerpipe"
+    - "server"
+  workdir: "/workspace"
+  user: "9193"
+
+# Validate ENV vars and binary behavior
+commandTests:
+  - name: "POWERPIPE_UPDATE_CHECK is false"
+    command: "sh"
+    args: ["-c", "printenv POWERPIPE_UPDATE_CHECK"]
+    expectedOutput: ["false"]
+    exitCode: 0
+
+  - name: "POWERPIPE_TELEMETRY is none"
+    command: "sh"
+    args: ["-c", "printenv POWERPIPE_TELEMETRY"]
+    expectedOutput: ["none"]
+    exitCode: 0
+
+  - name: "POWERPIPE_INSTALL_DIR is set"
+    command: "sh"
+    args: ["-c", "printenv POWERPIPE_INSTALL_DIR"]
+    expectedOutput: ["/home/powerpipe/.powerpipe"]
+    exitCode: 0
+
+  - name: "POWERPIPE_LISTEN is network"
+    command: "sh"
+    args: ["-c", "printenv POWERPIPE_LISTEN"]
+    expectedOutput: ["network"]
+    exitCode: 0
+
+  - name: "POWERPIPE_MOD_LOCATION is workspace"
+    command: "sh"
+    args: ["-c", "printenv POWERPIPE_MOD_LOCATION"]
+    expectedOutput: ["/workspace"]
+    exitCode: 0
+
+  - name: "POWERPIPE_LOG_LEVEL is warn"
+    command: "sh"
+    args: ["-c", "printenv POWERPIPE_LOG_LEVEL"]
+    expectedOutput: ["warn"]
+    exitCode: 0
+
+  - name: "powerpipe --version returns version string"
+    command: "powerpipe"
+    args: ["--version"]
+    expectedOutput:
+      - "Powerpipe v[0-9]+\\.[0-9]+\\.[0-9]+"
+    exitCode: 0
+
+  - name: "powerpipe --help exits 0"
+    command: "powerpipe"
+    args: ["--help"]
+    exitCode: 0
