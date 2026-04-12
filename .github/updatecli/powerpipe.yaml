@@ -1,6 +1,19 @@
 ---
 name: Bump Powerpipe version
 
+scms:
+  github:
+    kind: github
+    spec:
+      user: '{{ requiredEnv "GITHUB_ACTOR" }}'
+      email: '{{ requiredEnv "GITHUB_ACTOR" }}@users.noreply.github.com'
+      owner: devops-ia
+      repository: powerpipe
+      token: '{{ requiredEnv "GITHUB_TOKEN" }}'
+      branch: main
+      commitmessage:
+        title: 'chore: bump powerpipe to {{ source "powerpipe" }}'
+
 sources:
   powerpipe:
     kind: githubRelease
@@ -16,8 +29,18 @@ targets:
   dockerfile:
     name: "Update Powerpipe version in Dockerfile"
     kind: file
+    scmid: github
     sourceid: powerpipe
     spec:
       file: Dockerfile
       matchpattern: 'ARG POWERPIPE_VERSION=.*'
       replacepattern: 'ARG POWERPIPE_VERSION={{ source "powerpipe" }}'
+
+actions:
+  pr:
+    kind: github/pullrequest
+    scmid: github
+    title: 'chore: bump powerpipe to {{ source "powerpipe" }}'
+    spec:
+      labels:
+        - dependencies
