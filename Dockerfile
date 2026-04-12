@@ -12,8 +12,8 @@ LABEL org.opencontainers.image.url="https://powerpipe.io"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# hadolint ignore=DL3008,DL3005
 # git is required for 'powerpipe mod install' from GitHub repos
+# hadolint ignore=DL3008,DL3005
 RUN apt-get update && \
     apt-get upgrade -y --no-install-recommends && \
     apt-get install -y --no-install-recommends ca-certificates curl git jq && \
