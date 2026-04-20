@@ -50,6 +50,9 @@ package.json        → semantic-release config (do not modify)
 # Build
 docker build -t powerpipe:test .
 
+# Build for a specific version
+docker build --build-arg POWERPIPE_VERSION=1.5.1 -t powerpipe:test .
+
 # Smoke test
 docker run --rm powerpipe:test powerpipe --version
 
@@ -59,6 +62,73 @@ sleep 5
 curl -sf http://localhost:9033/ && echo "OK"
 docker stop pp-test
 ```
+
+### Unit tests (no Docker required)
+
+```bash
+pip install -r tests/requirements.txt
+
+# Full suite with coverage
+python3 -m pytest tests/ --cov=compare_snapshots --cov-report=term-missing
+
+# Single test
+python3 -m pytest tests/test_compare_snapshots.py::TestDiffLists::test_added_items -v
+```
+
+### Lint the Dockerfile
+
+```bash
+docker run --rm -i hadolint/hadolint < Dockerfile
+```
+
+### Container structure tests (requires built image)
+
+```bash
+docker run --rm \
+  -v "$PWD/structure-tests.yaml:/structure-tests.yaml:ro" \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  gcr.io/gcp-runtimes/container-structure-test:latest \
+  test --image powerpipe:test --config /structure-tests.yaml
+```
+
+### Security scan
+
+```bash
+docker run --rm \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  aquasec/trivy image --severity CRITICAL --ignore-unfixed powerpipe:test
+```
+
+## Commit Message Format
+
+This repo uses [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat: add support for multi-arch builds
+fix: correct workspace directory permissions
+chore: bump powerpipe to 1.6.0
+docs: add mod installation example
+```
+
+| Type | When to use |
+|------|------------|
+| `feat` | New feature or capability |
+| `fix` | Bug fix |
+| `chore` | Maintenance (version bumps, CI tweaks) |
+| `docs` | Documentation only |
+| `refactor` | Code restructure without behaviour change |
+
+## Key Conventions
+
+- **Port 9033** is Powerpipe's HTTP port. Port 9193 belongs to Steampipe — don't confuse them.
+- **UID 9193 / GID 0** — deliberate for OpenShift restricted SCC compatibility, consistent with the Steampipe image.
+- **`git` is a required runtime dep** — `powerpipe mod install` fetches mods from GitHub repos at runtime.
+- **Mods, not plugins** — Powerpipe uses *mods* (`powerpipe mod install`). "Plugins" is Steampipe terminology.
+- **`POWERPIPE_DATABASE` is deprecated** — the preferred approach is connection config files, not this env var.
+- **`ARG TARGETARCH`** is populated automatically by Docker Buildx for multi-arch builds (`linux/amd64`, `linux/arm64`). Do not hardcode it.
+- **Unit tests import from `scripts/`** — `tests/conftest.py` prepends `scripts/` to `sys.path`, enabling `import compare_snapshots` without an installable package.
+- **`behavior-check` CI job only runs on PRs when `POWERPIPE_VERSION` changes** in the Dockerfile. It extracts a fresh CLI snapshot, diffs it against `cli-snapshot.json`, and posts the result as a PR comment mentioning `@copilot`.
+- **`structure-tests.yaml`** validates all ENV vars set in the Dockerfile plus binary presence, metadata labels, exposed port, and default CMD. When adding/removing `ENV` lines in the Dockerfile, update this file too.
 
 ## Documentation Format
 
