@@ -50,12 +50,80 @@ docker pull devopsiaci/powerpipe:1.5.1
 
 | Flag | Description | Default |
 |------|-------------|---------|
-| `--listen` | Accept connections from `local` or `network` | `local` |
+| `--listen` | Accept connections from `local` or `network` | `local` (image default: `network`) |
 | `--port` | HTTP server port | `9033` |
 | `--dashboard-timeout` | Dashboard execution timeout (seconds) | `0` (no timeout) |
 | `--watch` | Watch mod files for changes | `true` |
 | `--var` | Set a variable value (`key=value`) | — |
 | `--var-file` | Path to `.ppvar` file | — |
+
+## `benchmark run` flags
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--output` | Output format: `text`, `brief`, `csv`, `json`, `html`, `md`, `snapshot`, `none` | `text` |
+| `--export` | Export results to file (format inferred from extension: `.json`, `.html`, `.csv`, `.md`) | — |
+| `--dry-run` | Preview controls that would run without executing | `false` |
+| `--search-path` | Steampipe connection search path | — |
+| `--search-path-prefix` | Prepend connections to search path (e.g. `aws_all`) | — |
+| `--var` | Set a variable value (`key=value`) | — |
+| `--var-file` | Path to `.ppvars` file | — |
+| `--tag` | Filter controls by tag (`key=value`) | — |
+| `--where` | Filter controls by SQL where clause | — |
+| `--timing` | Print timing information | `false` |
+| `--max-parallel` | Maximum parallel control executions | `10` |
+| `--benchmark-timeout` | Benchmark execution timeout (seconds, `0` = unlimited) | `0` |
+| `--progress` | Show execution progress | `true` |
+| `--mod-install` | Install mod dependencies before running | `true` |
+
+### Output format examples
+
+```bash
+# Human-readable summary
+docker exec powerpipe powerpipe benchmark run aws_compliance.benchmark.cis_aws_foundations_benchmark_v300 --output brief
+
+# Export as JSON
+docker exec powerpipe powerpipe benchmark run aws_compliance.benchmark.cis_aws_foundations_benchmark_v300 --export /workspace/results.json
+
+# Export as HTML report
+docker exec powerpipe powerpipe benchmark run aws_compliance.benchmark.cis_aws_foundations_benchmark_v300 --export /workspace/results.html
+
+# Filter controls by tag
+docker exec powerpipe powerpipe benchmark run aws_compliance.benchmark.cis_aws_foundations_benchmark_v300 --tag cis_level=1
+
+# Run across specific accounts
+docker exec powerpipe powerpipe benchmark run aws_compliance.benchmark.cis_aws_foundations_benchmark_v300 --search-path-prefix aws_all
+```
+
+## `detection` subcommand
+
+The `detection` subcommand runs detection queries against your data source.
+
+| Subcommand | Description |
+|------------|-------------|
+| `detection list` | List all detections in installed mods |
+| `detection run <name>` | Run a specific detection |
+| `detection show <name>` | Show detection details |
+
+### Detection flags (`detection run`)
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--output` | Output format: `text`, `csv`, `json`, `html`, `md`, `snapshot`, `none` | `text` |
+| `--export` | Export results to file | — |
+| `--search-path` | Steampipe connection search path | — |
+| `--max-parallel` | Maximum parallel executions | `10` |
+| `--detection-timeout` | Execution timeout (seconds, `0` = unlimited) | `0` |
+| `--var` | Set a variable value | — |
+| `--var-file` | Path to `.ppvars` file | — |
+
+```bash
+# List available detections
+docker exec powerpipe powerpipe detection list
+
+# Run a detection
+docker exec powerpipe powerpipe detection run <mod>.<detection_name>
+```
 
 ## Environment variables
 
@@ -69,12 +137,12 @@ Container-optimized defaults are pre-configured. Override as needed:
 | `POWERPIPE_PORT` | `9033` | HTTP server port |
 | `POWERPIPE_LOG_LEVEL` | `warn` | Logging level |
 | `POWERPIPE_MOD_LOCATION` | `/workspace` | Mod working directory |
-| `POWERPIPE_DATABASE` | — | Database connection string (deprecated — use config) |
-| `POWERPIPE_DASHBOARD_TIMEOUT` | `0` | Dashboard timeout (seconds) |
-| `POWERPIPE_BENCHMARK_TIMEOUT` | `0` | Benchmark timeout (seconds) |
 | `POWERPIPE_MEMORY_MAX_MB` | `1024` | Process memory soft limit (MB) |
 | `POWERPIPE_MAX_PARALLEL` | `10` | Maximum parallel executions |
 | `POWERPIPE_INSTALL_DIR` | `/home/powerpipe/.powerpipe` | Installation directory |
+| `POWERPIPE_DATABASE` | — | Database connection string (deprecated — use config files) |
+| `POWERPIPE_DASHBOARD_TIMEOUT` | — (binary default: `0`) | Dashboard timeout in seconds (`0` = unlimited) |
+| `POWERPIPE_BENCHMARK_TIMEOUT` | — (binary default: `0`) | Benchmark timeout in seconds (`0` = unlimited) |
 
 Full reference: [Powerpipe Environment Variables](https://powerpipe.io/docs/reference/env-vars)
 
@@ -93,6 +161,8 @@ This image is designed to work with the [helm-steampipe](https://github.com/devo
 |-------|-------------|
 | [Getting Started](docs/getting-started.md) | Docker, Docker Compose, mod install, first dashboard |
 | [Configuration](docs/configuration.md) | Environment variables, database connection, mod workspace |
+| [Mods](docs/mods.md) | Installing, updating, persisting mods; popular mods list |
+| [Integrations](docs/integrations.md) | Compose, nginx reverse proxy, Grafana, CI/CD exports |
 | [Kubernetes](docs/kubernetes.md) | Helm chart, workspace PVC, Secrets, health checks |
 | [Examples](docs/examples.md) | AWS benchmarks, multi-account, CI/CD integration |
 | [Troubleshooting](docs/troubleshooting.md) | Connection errors, mod not found, OOM, debug mode |
