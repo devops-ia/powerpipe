@@ -74,6 +74,24 @@ commandTests:
     expectedOutput: ["warn"]
     exitCode: 0
 
+  - name: "POWERPIPE_PORT is 9033"
+    command: "sh"
+    args: ["-c", "printenv POWERPIPE_PORT"]
+    expectedOutput: ["9033"]
+    exitCode: 0
+
+  - name: "POWERPIPE_MEMORY_MAX_MB is 1024"
+    command: "sh"
+    args: ["-c", "printenv POWERPIPE_MEMORY_MAX_MB"]
+    expectedOutput: ["1024"]
+    exitCode: 0
+
+  - name: "POWERPIPE_MAX_PARALLEL is 10"
+    command: "sh"
+    args: ["-c", "printenv POWERPIPE_MAX_PARALLEL"]
+    expectedOutput: ["10"]
+    exitCode: 0
+
   - name: "powerpipe --version returns version string"
     command: "powerpipe"
     args: ["--version"]

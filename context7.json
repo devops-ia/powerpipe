@@ -1,6 +1,7 @@
 {
   "$schema": "https://context7.com/schema/context7.json",
   "url": "https://context7.com/devops-ia/powerpipe",
+  "public_key": "pk_poNqP0E20Jn62M589pdY6",
   "projectTitle": "Powerpipe Docker Image",
   "description": "Community Docker image for Powerpipe — dashboards and compliance benchmarks for DevOps. Visualize cloud configurations and assess security posture against CIS, NIST, SOC 2, and other compliance frameworks. Multi-arch (amd64/arm64), production-ready.",
   "folders": ["docs", "examples"],

@@ -21,33 +21,39 @@ open http://localhost:9033
 
 ## Manual Docker run
 
-### 1. Start Steampipe first
+### 1. Create a Docker network
+
+```bash
+docker network create powerpipe-net
+```
+
+### 2. Start Steampipe first
 
 Powerpipe needs a running Steampipe PostgreSQL endpoint:
 
 ```bash
 docker run -d --name steampipe \
+  --network powerpipe-net \
   -p 9193:9193 \
   -e STEAMPIPE_DATABASE_PASSWORD=mypassword \
   ghcr.io/devops-ia/steampipe:2.4.1 \
   steampipe service start --foreground --database-listen network
 ```
 
-### 2. Install a plugin
+### 3. Install a plugin
 
 ```bash
 docker exec steampipe steampipe plugin install aws
 ```
 
-### 3. Start Powerpipe
+### 4. Start Powerpipe
 
 ```bash
 docker run -d --name powerpipe \
+  --network powerpipe-net \
   -p 9033:9033 \
   -e POWERPIPE_DATABASE="postgresql://steampipe:mypassword@steampipe:9193/steampipe" \
-  --link steampipe \
-  ghcr.io/devops-ia/powerpipe:1.5.1 \
-  powerpipe server --listen network
+  ghcr.io/devops-ia/powerpipe:1.5.1
 ```
 
 ### 4. Install a mod
