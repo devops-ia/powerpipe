@@ -1,0 +1,21 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "url": "https://context7.com/devops-ia/powerpipe",
+  "projectTitle": "Powerpipe Docker Image",
+  "description": "Community Docker image for Powerpipe — dashboards and compliance benchmarks for DevOps. Visualize cloud configurations and assess security posture against CIS, NIST, SOC 2, and other compliance frameworks. Multi-arch (amd64/arm64), production-ready.",
+  "folders": ["docs", "examples"],
+  "excludeFolders": ["scripts", ".github", "tests", "openspec"],
+  "excludeFiles": ["CONTRIBUTING.md", "structure-tests.yaml", "trivy.yaml", "cli-snapshot.json"],
+  "rules": [
+    "Always set POWERPIPE_DATABASE to a valid Steampipe connection string (postgresql://steampipe:<password>@<host>:9193/steampipe) — Powerpipe cannot start without it",
+    "Always use --listen network flag (or POWERPIPE_LISTEN=network) to accept connections from outside the container",
+    "Powerpipe serves dashboards on port 9033 (not 9193 — that is Steampipe's PostgreSQL port)",
+    "The container runs as UID 9193 (GID 0) — ensure mounted volumes have correct ownership with chown -R 9193:0",
+    "Mount the mod workspace as a named volume at /workspace to persist installed mods across container restarts",
+    "Use depends_on with healthcheck condition when composing Steampipe + Powerpipe to ensure Steampipe is ready before Powerpipe starts",
+    "Install mods with docker exec powerpipe powerpipe mod install <mod-url> after the container is running",
+    "Use POWERPIPE_BASE_URL when running behind a reverse proxy or when sharing dashboard links externally",
+    "Prefer ghcr.io/devops-ia/powerpipe over devopsiaci/powerpipe (Docker Hub mirror) for GitHub Actions workflows",
+    "Run one-shot benchmarks without starting the server: powerpipe benchmark run <benchmark> --output brief"
+  ]
+}
