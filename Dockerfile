@@ -47,6 +47,7 @@ WORKDIR /workspace
 
 EXPOSE 9033
 
+# hadolint ignore=DL3025
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD curl -sf http://localhost:9033/ || exit 1
 
